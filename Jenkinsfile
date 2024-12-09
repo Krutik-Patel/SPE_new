@@ -40,18 +40,30 @@ pipeline {
         //     }
         // }
 
-        stage('Deploy to kubernetes using Ansible notebook') {
-            steps {
-                script {
-                    sh """
-                        ansible-playbook ansible-deploy.yml \
-                        --extra-vars "dockerhub_username=${DOCKERHUB_USERNAME} \
-                                    k8s_deployment_file=${K8S_DEPLOYMENT_FILE} \
-                                    configmap_file=${CONFIGMAP_FILE}" \
-                        -vv
-                    """
+        // stage('Deploy to kubernetes using Ansible notebook') {
+        //     steps {
+        //         script {
+        //             sh """
+        //                 ansible-playbook ansible-deploy.yml \
+        //                 --extra-vars "dockerhub_username=${DOCKERHUB_USERNAME} \
+        //                             k8s_deployment_file=${K8S_DEPLOYMENT_FILE} \
+        //                             configmap_file=${CONFIGMAP_FILE}" \
+        //                 -vv
+        //             """
+        //         }
+        //     }
+        // }
+
+        stage("Deploy k8s to via ansible") {
+                    steps {
+                        echo 'Deploying k8s via ansible...'
+                        ansiblePlaybook(
+                            installation: 'Ansible',
+                            inventory: 'inventory.ini',
+                            playbook: 'ansible-deploy.yml',
+                            // vaultCredentialsId: 'ansible_vault_pass', // configure Jenkins credentials with secret text
+                        )
                 }
-            }
         }
 
         // stage('Start Minikube') {
