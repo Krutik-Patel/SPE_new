@@ -1,0 +1,38 @@
+---
+- name: Deploy Docker Images to Kubernetes
+  hosts: localhost
+  vars:
+    dockerhub_username: "krutikpatel"
+    configmap_file: "configmap.yml"
+    k8s_deployment_file: "k8s-deployment.yml"
+  tasks:
+    - name: debug output 
+      ansible.builtin.command: whoami
+      register: whoami_output
+    - debug:
+        var: whoami_output
+    # - name: Install required Python packages
+    #   pip:
+    #     name:
+    #       - openshift
+    #       - kubernetes
+    #       - pyyaml
+    #     state: present
+
+    # - name: Pull Docker images from Docker Hub
+    #   ansible.builtin.command:
+    #     cmd: docker pull {{ dockerhub_username }}/{{ item }}:latest
+    #   with_items:
+    #     - frontend
+    #     - backend
+    #     - model
+
+    - name: Apply Kubernetes ConfigMap
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', configmap_file) }}"
+        # validate: false
+
+    - name: Apply Kubernetes Deployment
+      kubernetes.core.k8s:
+        definition: "{{ lookup('file', k8s_deployment_file) }}"
+        # validate: false

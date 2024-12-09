@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+        - name: frontend
+          image: "krutikpatel/frontend"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          env:
+            - name: USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: username
+        - name: backend
+          image: "krutikpatel/backend:latest"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: username
+        - name: model
+          image: "krutikpatel/model:latest"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: username
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+  namespace: default
+spec:
+  selector:
+    app: app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: NodePort
